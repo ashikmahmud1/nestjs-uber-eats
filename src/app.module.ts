@@ -3,8 +3,8 @@ import * as Joi from 'joi';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RestaurantsModule } from './restaurants/restaurants.module';
-import { Restaurant } from './restaurants/entities/restaurant.entity';
+import { UsersModule } from './users/users.module';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -28,13 +28,14 @@ import { Restaurant } from './restaurants/entities/restaurant.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [],
+      entities: [User],
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: true,
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
     }),
+    UsersModule,
   ],
   controllers: [],
   providers: [],
