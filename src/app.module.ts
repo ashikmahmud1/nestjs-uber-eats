@@ -5,6 +5,8 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
+import { JwtModule } from './jwt/jwt.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -13,13 +15,14 @@ import { User } from './users/entities/user.entity';
       envFilePath: process.env.NODE_ENV === 'dev' ? 'dev.env' : 'test.env',
       ignoreEnvFile: process.env.NODE_ENV === 'prod',
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('dev','prod').required(),
+        NODE_ENV: Joi.string().valid('dev', 'prod').required(),
         DB_HOST: Joi.string().required(),
         DB_PORT: Joi.string().required(),
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
-        DB_NAME: Joi.string().required()
-      })
+        DB_NAME: Joi.string().required(),
+        PRIVATE_KEY: Joi.string().required(),
+      }),
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -35,7 +38,11 @@ import { User } from './users/entities/user.entity';
     GraphQLModule.forRoot({
       autoSchemaFile: true,
     }),
+    JwtModule.forRoot({
+      privateKey: process.env.PRIVATE_KEY,
+    }),
     UsersModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],
