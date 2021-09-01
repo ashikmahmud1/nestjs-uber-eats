@@ -10,13 +10,19 @@ import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { JwtService } from '../jwt/jwt.service';
 import { UserProfileOutput } from './dtos/user-profile.dto';
+import { Verification } from './entities/verification.entity';
+import { MailService } from '../mail/mail.service';
+import {VerifyEmailOutput} from "./dtos/verify-email.dto";
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(Verification)
+    private readonly verifications: Repository<Verification>,
     private readonly config: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async createAccount({
@@ -32,12 +38,12 @@ export class UserService {
       const user = await this.users.save(
         this.users.create({ email, password, role }),
       );
-      // const verification = await this.verifications.save(
-      //   this.verifications.create({
-      //     user,
-      //   }),
-      // );
-      // this.mailService.sendVerificationEmail(user.email, verification.code);
+      const verification = await this.verifications.save(
+        this.verifications.create({
+          user,
+        }),
+      );
+      this.mailService.sendVerificationEmail(user.email, verification.code);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: "Couldn't create account" };
@@ -86,6 +92,24 @@ export class UserService {
       };
     } catch (error) {
       return { ok: false, error: 'User Not Found' };
+    }
+  }
+
+  async verifyEmail(code: string): Promise<VerifyEmailOutput> {
+    try {
+      const verification = await this.verifications.findOne(
+        { code },
+        { relations: ['user'] },
+      );
+      if (verification) {
+        verification.user.verified = true;
+        await this.users.save(verification.user);
+        await this.verifications.delete(verification.id);
+        return { ok: true };
+      }
+      return { ok: false, error: 'Verification not found.' };
+    } catch (error) {
+      return { ok: false, error: 'Could not verify email.' };
     }
   }
 }

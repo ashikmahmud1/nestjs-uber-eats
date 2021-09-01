@@ -9,7 +9,7 @@ import { BeforeInsert, Column, Entity } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
-import { IsEmail, IsEnum } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum } from 'class-validator';
 
 enum UserRole {
   Client,
@@ -36,6 +36,11 @@ export class User extends CoreEntity {
   @Field((type) => UserRole)
   @IsEnum(UserRole)
   role: UserRole;
+
+  @Column({ default: false })
+  @Field((type) => Boolean)
+  @IsBoolean()
+  verified: boolean;
 
   @BeforeInsert()
   async hashPassword(): Promise<void> {
