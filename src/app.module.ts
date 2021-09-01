@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { CommonModule } from './common/common.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { CommonModule } from './common/common.module';
     }),
     UsersModule,
     CommonModule,
+    MailModule,
   ],
   controllers: [],
   providers: [],
